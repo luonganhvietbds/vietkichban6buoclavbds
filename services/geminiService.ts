@@ -41,6 +41,10 @@ export const createDetailedScript = async (apiKey: string, generalScript: string
   return callGemini(apiKey, systemPrompt, generalScript);
 };
 
+export const upgradePrompts = async (apiKey: string, detailedScript: string, systemPrompt: string): Promise<string> => {
+  return callGemini(apiKey, systemPrompt, detailedScript);
+};
+
 export const extractAndCleanPrompts = async (apiKey: string, detailedScript: string, systemPrompt: string): Promise<string> => {
   return callGemini(apiKey, systemPrompt, detailedScript);
 };

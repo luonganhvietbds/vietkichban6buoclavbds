@@ -5,6 +5,7 @@ import {
   getTopicIdeas,
   createGeneralScript, 
   createDetailedScript,
+  upgradePrompts,
   extractAndCleanPrompts,
   extractVoiceOver,
   createThumbnailAndMetadata
@@ -25,7 +26,7 @@ import VideoIcon from './components/icons/VideoIcon';
 // --- HELPERS ---
 // Defines which step's output is the source for the current step's input
 const INPUT_SOURCE_MAP: { [key: number]: number } = {
-  2: 1, 3: 2, 4: 3, 5: 3, 6: 1,
+  2: 1, 3: 2, 4: 3, 5: 4, 6: 3, 7: 1,
 };
 
 
@@ -231,8 +232,9 @@ const App: React.FC = () => {
         case 2: return stepOutputs[1];
         case 3: return stepOutputs[2];
         case 4: return stepOutputs[3];
-        case 5: return stepOutputs[3];
-        case 6: return stepOutputs[1];
+        case 5: return stepOutputs[4];
+        case 6: return stepOutputs[3];
+        case 7: return stepOutputs[1];
         default: return null;
     }
   }, [stepOutputs, topicKeyword]);
@@ -327,10 +329,10 @@ const App: React.FC = () => {
   const getCopyableResultText = useCallback((stepId: number) => {
     const output = stepOutputs[stepId];
     if (!output) return '';
-    if (stepId === 5) {
+    if (stepId === 6) {
        return output.split('\n').map(line => line.trim()).filter(line => line.match(/^\d+\.\s/)).map(line => line.replace(/^\d+\.\s*/, '')).join('\n');
     }
-    if (stepId === 4) {
+    if (stepId === 5) {
         try {
             let jsonString = output.match(/\{[\s\S]*\}/)?.[0] || '{}';
             const parsed = JSON.parse(jsonString);
@@ -407,9 +409,10 @@ const App: React.FC = () => {
           switch (currentStep) {
             case 2: result = await createGeneralScript(apiKey, input, systemPrompt); break;
             case 3: result = await createDetailedScript(apiKey, input, systemPrompt); break;
-            case 4: result = await extractAndCleanPrompts(apiKey, input, systemPrompt); break;
-            case 5: result = await extractVoiceOver(apiKey, input, systemPrompt); break;
-            case 6: result = await createThumbnailAndMetadata(apiKey, input, systemPrompt); break;
+            case 4: result = await upgradePrompts(apiKey, input, systemPrompt); break;
+            case 5: result = await extractAndCleanPrompts(apiKey, input, systemPrompt); break;
+            case 6: result = await extractVoiceOver(apiKey, input, systemPrompt); break;
+            case 7: result = await createThumbnailAndMetadata(apiKey, input, systemPrompt); break;
             default: throw new Error("Bước không hợp lệ.");
           }
 
@@ -454,9 +457,10 @@ const App: React.FC = () => {
             break; 
         case 2: result = await createGeneralScript(apiKey, input!, systemPrompt); break;
         case 3: result = await createDetailedScript(apiKey, input!, systemPrompt); break;
-        case 4: result = await extractAndCleanPrompts(apiKey, input!, systemPrompt); break;
-        case 5: result = await extractVoiceOver(apiKey, input!, systemPrompt); break;
-        case 6: result = await createThumbnailAndMetadata(apiKey, input!, systemPrompt); break;
+        case 4: result = await upgradePrompts(apiKey, input!, systemPrompt); break;
+        case 5: result = await extractAndCleanPrompts(apiKey, input!, systemPrompt); break;
+        case 6: result = await extractVoiceOver(apiKey, input!, systemPrompt); break;
+        case 7: result = await createThumbnailAndMetadata(apiKey, input!, systemPrompt); break;
         default: throw new Error("Bước này không thể tạo lại.");
       }
 
@@ -537,7 +541,7 @@ const App: React.FC = () => {
             imagePrompts: type === 'image' ? newPrompts : imagePrompts,
             videoPrompts: type === 'video' ? newPrompts : videoPrompts,
         };
-        handleUpdateStepOutput(4, JSON.stringify(updatedData, null, 2));
+        handleUpdateStepOutput(5, JSON.stringify(updatedData, null, 2));
     };
 
     return (
@@ -570,7 +574,7 @@ const App: React.FC = () => {
         );
     }
     
-    if (viewingStep === 4 && stepOutputs[viewingStep]) return renderSplitPromptView(stepOutputs[viewingStep]!);
+    if (viewingStep === 5 && stepOutputs[viewingStep]) return renderSplitPromptView(stepOutputs[viewingStep]!);
 
     if (viewingStep === 1) {
       return (
@@ -605,7 +609,7 @@ const App: React.FC = () => {
   }
 
   const renderCopyAllButton = () => {
-    if (!completedSteps.includes(6)) return null;
+    if (!completedSteps.includes(7)) return null;
     return (
         <div className="mt-12 text-center">
             <button
@@ -622,14 +626,14 @@ const App: React.FC = () => {
   
   if (!isLoggedIn) return <Login onLoginSuccess={handleLoginSuccess} />;
 
-  const isPromptStep = viewingStep === 4 && stepOutputs[viewingStep];
+  const isPromptStep = viewingStep === 5 && stepOutputs[viewingStep];
 
   return (
     <div className="bg-slate-900 text-white min-h-screen font-sans">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Trình Biên Tập Video AI All - In - One</h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Xây dựng kịch bản video chuyên nghiệp với quy trình 6 bước thông minh.</p>
+          <p className="mt-3 max-w-md mx-auto text-base text-slate-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Xây dựng kịch bản video chuyên nghiệp với quy trình 7 bước thông minh.</p>
           <div className="mt-6 max-w-2xl mx-auto text-slate-400 text-sm p-4 bg-slate-800/50 rounded-lg border border-slate-700">
              <p>Contact: 0976863675</p>
             <p>Kết Bạn Zalo Hoặc Tham Gia Group <a href="https://zalo.me/g/ggyayc318" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">Tại Đây</a> Để Được Hướng Dẫn Thêm</p>
